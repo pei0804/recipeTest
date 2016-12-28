@@ -31,16 +31,65 @@ Class RecipeController extends Controller
     // 新規作成処理
     public function store()
     {
-        $Recipe = new Recipe();
-        $Recipe->load(Input::post());
-        $Recipe->validate();
 
-        if ($Recipe->hasErrors()) {
-            $this->data['title'] = 'レシピ新規作成';
-            print_r($Recipe->getErrors()); // return errors
-            $this->app->redirect('recipe/create');
-            View::display('recipe/input.twig', $this->data);
+        $memberId = 1;
+        $timestamp = time();
+
+        // 後でConfとかでまとめる
+        $videoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/video/";
+        $thumbFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/thumb/";
+        $ffmpegAppPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/app/cmd/ffmpeg";
+        $userVideoFolderPath = $videoFolderPath . $memberId;
+
+        //「$userVideoFolderPath」で指定されたディレクトリが存在するか確認
+        if(!file_exists($userVideoFolderPath)){
+            //存在しないときの処理（「$userVideoFolderPath」で指定されたディレクトリを作成する）
+            if(mkdir($userVideoFolderPath, 0777)){
+                //作成したディレクトリのパーミッションを確実に変更
+                chmod($userVideoFolderPath, 0777);
+            }else{
+                //作成に失敗した時の処理
+                echo "作成に失敗しました";
+            }
         }
+
+        $clip = Input::file('clip');
+        // hogehoge.mpd -> hogehoge
+        $clipFileName = pathinfo($clip['name'], PATHINFO_FILENAME);
+
+        // ファイル名：filen
+        $clipUploadFileName = "{$clipFileName}_{$timestamp}";
+
+        // ファイルを移動 アップロード
+        move_uploaded_file($clip['tmp_name'], "{$userVideoFolderPath}/{$clipUploadFileName}.mp4");
+
+        $uploadFilePath = "{$userVideoFolderPath}/{$clipUploadFileName}.mp4";
+        // http://qiita.com/tukiyo3/items/d8caac4fcf8ad5a7167b
+        exec("{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$thumbFolderPath}{$uploadFilePath}.jpg");
+        print "{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$thumbFolderPath}{$clipUploadFileName}.jpg";
+
+
+        // NG
+//        $Recipe = new Recipe();
+////        $Recipe->load(Input::post());
+//
+//        $clip = Input::file('clip');
+//        $name = md5(sha1(uniqid(mt_rand(), true))).'.'.$clip->getClientOriginalExtension();
+//        $clip->move('media', $name);
+//
+//        try {
+//            $Recipe->validate();
+//            if ($Recipe->hasErrors()) {
+////                $Recipe->save();
+//                $this->app->redirect('recipe/create');
+//                View::display('recipe/input.twig', $this->data);
+//                $memberId = 1;
+//                mkdir('video/' . 1, 0755);
+//                exec('/app/cmd/ffmpeg -i video/' . $memberId . '/' . $clip . ' -ss 1 -vframes 1 -f image2 video/' . $memberId . '/thumb_' . $filename . '.jpg');
+//            }
+//        } catch (\Exception $e) {
+//            print_r($e->getMessage());
+//        }
     }
 
     // getでrecipe/:idにアクセスされた場合
