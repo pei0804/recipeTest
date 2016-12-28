@@ -139,7 +139,6 @@ Class RecipeController extends Controller
         } else {
             // TODO: エラー処理
             unlink($uploadFilePath);
-            print '失敗';
         }
         //-------------判定---------------
         if ($isError) {
@@ -148,18 +147,18 @@ Class RecipeController extends Controller
 
         try {
             $Recipe->save();
+            $recipeId = $Recipe->getConnection()->getPdo()->lastInsertId();
 
             // RecipeID取得のためループ
             for ($i = 0; $i < count($ingredientsInserts); $i++) {
-                $ingredientsInserts[$i]['id'] = $Recipe->getConnection()->getPdo()->lastInsertId();
+                $ingredientsInserts[$i]['id'] = $recipeId;
             }
             DB::table('ingredients')->insert($ingredientsInserts);
             App::flash('messageSuccess', "登録が完了しました");
-//            Response::redirect($this->siteUrl('recipe') . '/' . $Recipe->getConnection()->getPdo()->lastInsertId());
+            Response::redirect($this->siteUrl('recipe') . '/' . $recipeId);
 
         } catch (\Exception $e) {
             print_r($e->getMessage());
-            print "<hr>";
         }
 
     }
