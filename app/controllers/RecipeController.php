@@ -145,7 +145,9 @@ Class RecipeController extends Controller
             App::flash('messageError', "登録に失敗しました。入力内容をご確認ください");
         }
 
+        $db = \DB::getConnection();
         try {
+            $db->beginTransaction();
             $Recipe->save();
             $recipeId = $Recipe->getConnection()->getPdo()->lastInsertId();
 
@@ -154,11 +156,12 @@ Class RecipeController extends Controller
                 $ingredientsInserts[$i]['id'] = $recipeId;
             }
             DB::table('ingredients')->insert($ingredientsInserts);
+            $db->commit();
             App::flash('messageSuccess', "登録が完了しました");
             Response::redirect($this->siteUrl('recipe') . '/' . $recipeId);
-
         } catch (\Exception $e) {
             print_r($e->getMessage());
+            $db->rollBack();
         }
 
     }

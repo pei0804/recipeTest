@@ -16,32 +16,5 @@ $config['database'] = array(
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
         ),
-
-        'sqlite' => array(
-            'driver'   => 'sqlite',
-            'database' => APP_PATH.'storage/db/database.sqlite',
-            'prefix'   => '',
-        ),
-
-        'pgsql' => array(
-            'driver'   => 'pgsql',
-            'host'     => 'localhost',
-            'database' => 'database',
-            'username' => 'root',
-            'password' => '',
-            'charset'  => 'utf8',
-            'prefix'   => '',
-            'schema'   => 'public',
-        ),
-
-        'sqlsrv' => array(
-            'driver'   => 'sqlsrv',
-            'host'     => '127.0.0.1',
-            'database' => 'database',
-            'username' => 'user',
-            'password' => '',
-            'prefix'   => '',
-        ),
-
     )
 );
