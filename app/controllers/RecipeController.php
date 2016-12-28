@@ -94,10 +94,11 @@ Class RecipeController extends Controller
         //----------フォルダ作成（なければ）-------------/
 
         // TODO: 本来はCONFクラスにまとめる
-        $thumbFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/thumb/";
         $ffmpegAppPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/app/cmd/ffmpeg";
+        $thumbFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/thumb/";
         $videoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/video/";
         $userVideoFolderPath = $videoFolderPath . $memberId;
+        $userThumbFolderPath = $thumbFolderPath . $memberId;
 
         // フォルダ作成
         //「$userVideoFolderPath」で指定されたディレクトリが存在するか確認
@@ -106,6 +107,15 @@ Class RecipeController extends Controller
             if (mkdir($userVideoFolderPath, 0777)) {
                 //作成したディレクトリのパーミッションを確実に変更
                 chmod($userVideoFolderPath, 0777);
+            } else {
+                App::flash('video', 'アップロード準備に失敗しました。もう一度お試しください');
+                $isError = true;
+            }
+        }
+
+        if (!file_exists($userThumbFolderPath)) {
+            if (mkdir($userThumbFolderPath, 0777)) {
+                chmod($userThumbFolderPath, 0777);
             } else {
                 App::flash('video', 'アップロード準備に失敗しました。もう一度お試しください');
                 $isError = true;
@@ -122,19 +132,18 @@ Class RecipeController extends Controller
 
         //----------サムネイル作成--------------//
         // http://qiita.com/tukiyo3/items/d8caac4fcf8ad5a7167b
-        exec("{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$thumbFolderPath}{$uploadFilePath}.jpg");
-        if (!file_exists($uploadFilePath)) {
+        exec("{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$userThumbFolderPath}/{$clipUploadFileName}.jpg");
+        if (!file_exists("{$thumbFolderPath}{$uploadFilePath}.jpg")) {
             App::flash('video', 'サムネイル作成に失敗しました。もう一度お試しください');
             $isError = true;
         } else {
             // TODO: エラー処理
             unlink($uploadFilePath);
+            print '失敗';
         }
         //-------------判定---------------
         if ($isError) {
             App::flash('messageError', "登録に失敗しました。入力内容をご確認ください");
-        } else {
-            print "失敗してる";
         }
 
         try {

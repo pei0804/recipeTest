@@ -46,7 +46,13 @@
         ],
         "db-down": [
             "php vendor/kohkimakimoto/lib-migration/bin/phpmigrate down"
-        ]
+        ],
+        "test-delete": [
+            "sudo chmod -R 777 app/public/video",
+            "sudo chmod -R 777 app/public/thumb",
+            "rm -rf app/public/video/",
+            "rm -rf app/public/thumb/"
+        ],
     },
     "config": {
         "preferred-install": "dist"
