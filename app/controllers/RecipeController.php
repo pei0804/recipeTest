@@ -39,6 +39,7 @@ Class RecipeController extends Controller
 
         //---------------------
         $recipeInput = Input::post();
+        App::flash('input', Input::post());
         $clip = Input::file('clip');
         if (!is_uploaded_file($clip["tmp_name"])) {
             App::flash('video', 'ビデオがアップロードできませんでした');
@@ -74,20 +75,26 @@ Class RecipeController extends Controller
         $ingredientsInput = Input::post();
         $checkValue = [];
         $ingredientsInserts = [];
+        $ingredientsInputError = [];
+        $ingredientsNo = 1;
 
         // HACK: eloquant 5.3系ならまとめてvaldiationできる
         for ($i = 0; $i < count($ingredientsInput['name']); $i++) {
-            $checkValue['ingredients_no'] = $i + 1;
             $checkValue['name'] = $ingredientsInput['name'][$i];
             $checkValue['quantity'] = $ingredientsInput['quantity'][$i];
             $Ingredients->load($checkValue);
             $Ingredients->validate();
+            if(!$Ingredients->hasErrors()) {
+                $checkValue['quantity'] = $ingredientsNo;
+                $ingredientsNo++;
+            }
             $ingredientsInputError[] = $Ingredients->getErrors();
             $ingredientsInserts[] = $checkValue;
         }
+        App::flash('ingredients', $ingredientsInserts);
 
         if (count($ingredientsInputError) != 0) {
-            App::flash('ingredients', $Recipe->getErrors());
+            App::flash('errorIngredients', $Recipe->getErrors());
             $isError = true;
         }
 
@@ -150,12 +157,15 @@ Class RecipeController extends Controller
             $db->beginTransaction();
             $Recipe->save();
             $recipeId = $Recipe->getConnection()->getPdo()->lastInsertId();
-
             // RecipeID取得のためループ
             for ($i = 0; $i < count($ingredientsInserts); $i++) {
                 $ingredientsInserts[$i]['id'] = $recipeId;
+                $Ingredients->load($ingredientsInserts);
+                $Ingredients->validate();
+                if(!$Ingredients->hasErrors()) {
+                    $Ingredients->save();
+                }
             }
-            DB::table('ingredients')->insert($ingredientsInserts);
             $db->commit();
             App::flash('messageSuccess', "登録が完了しました");
             Response::redirect($this->siteUrl('recipe') . '/' . $recipeId);
@@ -163,6 +173,32 @@ Class RecipeController extends Controller
             print_r($e->getMessage());
             $db->rollBack();
         }
+
+//        $db = \DB::getConnection();
+//        try {
+//            $db->beginTransaction();
+//            $Recipe->save();
+//            $recipeId = $Recipe->getConnection()->getPdo()->lastInsertId();
+//
+//            $ingredientsNo = 1;
+//            for ($i = 0; $i < count($ingredientsInserts); $i++) {
+//                if(strlen($ingredientsInserts[$i]['name']) != 0 && strlen($ingredientsInserts[$i]['quantity']) != 0) {
+//                    $ingredientsInserts[$i]['id'] = $recipeId;
+//                    $ingredientsInserts[$i]['ingredients_no'] = $ingredientsNo;
+//                    $ingredientsNo++;
+//                    DB::table('ingredients')->insert($ingredientsInserts[$i]);
+//
+//                }
+//            }
+//            DB::table('ingredients')->insert($ingredientsInserts);
+//            $db->commit();
+//            App::flash('messageSuccess', "登録が完了しました");
+////            Response::redirect($this->siteUrl('recipe') . '/' . $recipeId);
+//        } catch (\Exception $e) {
+//            print_r($e->getMessage());
+//            $db->rollBack();
+////            Response::redirect($this->siteUrl('recipe/create'));
+//        }
 
     }
 
