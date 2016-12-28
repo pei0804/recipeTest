@@ -31,73 +31,147 @@ Class RecipeController extends Controller
     // 新規作成処理
     public function store()
     {
-
+        //---------SESSIONで取る------------
         $memberId = 1;
-        $timestamp = time();
 
-        // 後でConfとかでまとめる
-        $videoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/video/";
-        $thumbFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/thumb/";
-        $ffmpegAppPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/app/cmd/ffmpeg";
-        $userVideoFolderPath = $videoFolderPath . $memberId;
+        // ????: 判定するものが多すぎるのて一旦flgで判定する
+        $isError = false;
 
-        //「$userVideoFolderPath」で指定されたディレクトリが存在するか確認
-        if(!file_exists($userVideoFolderPath)){
-            //存在しないときの処理（「$userVideoFolderPath」で指定されたディレクトリを作成する）
-            if(mkdir($userVideoFolderPath, 0777)){
-                //作成したディレクトリのパーミッションを確実に変更
-                chmod($userVideoFolderPath, 0777);
-            }else{
-                //作成に失敗した時の処理
-                echo "作成に失敗しました";
-            }
+        //---------------------
+        $recipeInput = Input::post();
+        $clip = Input::file('clip');
+        if (!is_uploaded_file($clip["tmp_name"])) {
+            App::flash('video', 'ビデオがアップロードできませんでした');
+            $isError = true;
+        } else if ($clip["type"] != "video/mp4") {
+            App::flash('video', 'ビデオはMP4形式のみ対応しています');
+            $isError = true;
         }
 
-        $clip = Input::file('clip');
         // hogehoge.mpd -> hogehoge
         $clipFileName = pathinfo($clip['name'], PATHINFO_FILENAME);
 
-        // ファイル名：filen
+        // ファイル名：filename_timestamp
+        $timestamp = time();
         $clipUploadFileName = "{$clipFileName}_{$timestamp}";
 
-        // ファイルを移動 アップロード
-        move_uploaded_file($clip['tmp_name'], "{$userVideoFolderPath}/{$clipUploadFileName}.mp4");
+        //----------recipeテーブル処理--------------//
+        $Recipe = new Recipe();
+        $recipeInput['member_id'] = 1;
+        $recipeInput['thumb'] = "{$clipUploadFileName}.jpg";
+        $recipeInput['clip'] = "{$clipUploadFileName}.mp4";
+        $Recipe->load($recipeInput);
+        $Recipe->validate();
 
+        // エラーがあればこの時点で格納しておく
+        if (!$Recipe->hasErrors()) {
+            App::flash('recipe', $Recipe->getErrors());
+            $isError = true;
+        }
+
+        //----------ingredientsテーブル処理--------------//
+        $Ingredients = new Ingredients();
+        $ingredientsInput = Input::post();
+        $checkValue = [];
+        $ingredientsInserts = [];
+
+        // HACK: eloquant 5.3系ならまとめてvaldiationできる
+        for ($i = 0; $i < count($ingredientsInput['name']); $i++) {
+            $checkValue['ingredients_no'] = $i + 1;
+            $checkValue['name'] = $ingredientsInput['name'][$i];
+            $checkValue['quantity'] = $ingredientsInput['quantity'][$i];
+            $Ingredients->load($checkValue);
+            $Ingredients->validate();
+            $ingredientsInputError[] = $Ingredients->getErrors();
+            $ingredientsInserts[] = $checkValue;
+        }
+
+        if (count($ingredientsInputError) != 0) {
+            App::flash('ingredients', $Recipe->getErrors());
+            $isError = true;
+        }
+
+        //----------フォルダ作成（なければ）-------------/
+
+        // TODO: 本来はCONFクラスにまとめる
+        $thumbFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/thumb/";
+        $ffmpegAppPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/app/cmd/ffmpeg";
+        $videoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/video/";
+        $userVideoFolderPath = $videoFolderPath . $memberId;
+
+        // フォルダ作成
+        //「$userVideoFolderPath」で指定されたディレクトリが存在するか確認
+        if (!file_exists($userVideoFolderPath)) {
+            //存在しないときの処理（「$userVideoFolderPath」で指定されたディレクトリを作成する）
+            if (mkdir($userVideoFolderPath, 0777)) {
+                //作成したディレクトリのパーミッションを確実に変更
+                chmod($userVideoFolderPath, 0777);
+            } else {
+                App::flash('video', 'アップロード準備に失敗しました。もう一度お試しください');
+                $isError = true;
+            }
+        }
+
+        //----------動画アップロード--------------//
+        move_uploaded_file($clip['tmp_name'], "{$userVideoFolderPath}/{$clipUploadFileName}.mp4");
         $uploadFilePath = "{$userVideoFolderPath}/{$clipUploadFileName}.mp4";
+        if (!file_exists($uploadFilePath)) {
+            App::flash('video', 'ビデオアップロードに失敗しました。もう一度お試しください');
+            $isError = true;
+        }
+
+        //----------サムネイル作成--------------//
         // http://qiita.com/tukiyo3/items/d8caac4fcf8ad5a7167b
         exec("{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$thumbFolderPath}{$uploadFilePath}.jpg");
-        print "{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$thumbFolderPath}{$clipUploadFileName}.jpg";
+        if (!file_exists($uploadFilePath)) {
+            App::flash('video', 'サムネイル作成に失敗しました。もう一度お試しください');
+            $isError = true;
+        } else {
+            // TODO: エラー処理
+            unlink($uploadFilePath);
+        }
+        //-------------判定---------------
+        if ($isError) {
+            App::flash('messageError', "登録に失敗しました。入力内容をご確認ください");
+        } else {
+            print "失敗してる";
+        }
 
+        try {
+            $Recipe->save();
 
-        // NG
-//        $Recipe = new Recipe();
-////        $Recipe->load(Input::post());
-//
-//        $clip = Input::file('clip');
-//        $name = md5(sha1(uniqid(mt_rand(), true))).'.'.$clip->getClientOriginalExtension();
-//        $clip->move('media', $name);
-//
-//        try {
-//            $Recipe->validate();
-//            if ($Recipe->hasErrors()) {
-////                $Recipe->save();
-//                $this->app->redirect('recipe/create');
-//                View::display('recipe/input.twig', $this->data);
-//                $memberId = 1;
-//                mkdir('video/' . 1, 0755);
-//                exec('/app/cmd/ffmpeg -i video/' . $memberId . '/' . $clip . ' -ss 1 -vframes 1 -f image2 video/' . $memberId . '/thumb_' . $filename . '.jpg');
-//            }
-//        } catch (\Exception $e) {
-//            print_r($e->getMessage());
-//        }
+            // RecipeID取得のためループ
+            for ($i = 0; $i < count($ingredientsInserts); $i++) {
+                $ingredientsInserts[$i]['id'] = $Recipe->getConnection()->getPdo()->lastInsertId();
+            }
+            DB::table('ingredients')->insert($ingredientsInserts);
+            App::flash('messageSuccess', "登録が完了しました");
+//            Response::redirect($this->siteUrl('recipe') . '/' . $Recipe->getConnection()->getPdo()->lastInsertId());
+
+        } catch (\Exception $e) {
+            print_r($e->getMessage());
+            print "<hr>";
+        }
+
     }
 
     // getでrecipe/:idにアクセスされた場合
     // 詳細画面
     public function show($id)
     {
-        $this->data['title'] = '◯◯料理レシピ';
-        View::display('recipe/show.twig', $this->data);
+        $Recipe = new Recipe();
+        try {
+            $findRecipe = $Recipe::findOrFail($id);
+            $this->data['title'] = $findRecipe->title;
+            $this->data['recipe'] = $findRecipe;
+            App::render('recipe/show.twig', $this->data);
+        } catch (\SQLiteException $e) {
+            App::flash('messageError', "データベースエラーが発生しました。管理者にお問い合わせください。");
+            Response::redirect($this->siteUrl('recipe'));
+        } catch (Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            App::flash('messageError', "存在しないレポートが指定されました。");
+            Response::redirect($this->siteUrl('recipe'));
+        }
     }
 
     // getでrecipe/:id/editにアクセスされた場合

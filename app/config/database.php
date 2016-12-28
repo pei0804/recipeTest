@@ -8,10 +8,10 @@ $config['database'] = array(
         'mysql' => array(
             'driver'    => 'mysql',
             // http://qiita.com/dolaemoso/items/35f6bba22801b4027ec4
-            'host'      => isset($_SERVER['SLIM_HOST']) ? $_SERVER['SLIM_HOST'] : '',
-            'database'  => isset($_SERVER['SLIM_NAME']) ? $_SERVER['SLIM_NAME'] : '',
-            'username'  => isset($_SERVER['SLIM_USER']) ? $_SERVER['SLIM_USER'] : '',
-            'password'  => isset($_SERVER['SLIM_PASS']) ? $_SERVER['SLIM_PASS'] : '',
+            'host'      => isset($_SERVER['CANDY_HOST']) ? $_SERVER['CANDY_HOST'] : '',
+            'database'  => isset($_SERVER['CANDY_NAME']) ? $_SERVER['CANDY_NAME'] : '',
+            'username'  => isset($_SERVER['CANDY_USER']) ? $_SERVER['CANDY_USER'] : '',
+            'password'  => isset($_SERVER['CANDY_PASS']) ? $_SERVER['CANDY_PASS'] : '',
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',

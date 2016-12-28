@@ -20,16 +20,16 @@
     <article>
         <section>
             <video controls autoplay>
-                <source src="video/<?= $clip ?>">
+                <source src="/candy/public/video/{{ recipe.member_id }}/{{ recipe.clip }}">
                 <p>動画を再生するには、videoタグをサポートしたブラウザが必要です。</p>
             </video>
             <div class="clipInfo">
                 <a href="">
                     <div class="userIcon"><img src="img/icon.png" alt=""></div>
-                    <span class="userName"><?= $name ?></span>
+                    <span class="userName">{{ user.name }}</span>
                 </a>
                 <div class="play">
-                    <span class="count"><?= $views ?></span>
+                    <span class="count">{{ recipe.views }}</span>
                     <span>views</span>
                 </div>
                 <div class="dlBtn">

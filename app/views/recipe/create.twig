@@ -9,7 +9,7 @@
                 <table class="tblStyle01">
                     <tr class="recipeTitle">
                         <th>レシピタイトル</th>
-                        <td><input type="text" name="title" value=""></td>
+                        <td><input type="text" name="title" value="title"></td>
                         <p class="errorMessage"> {{ flash.errors.title|first }}</p>
                     </tr>
                     <tr class="recipeVideo">
@@ -19,34 +19,34 @@
                     </tr>
                     <tr class="recipeExplain">
                         <th>簡単な説明</th>
-                        <td><textarea name="explain" rows="3"></textarea></td>
+                        <td><textarea name="explain" rows="3">説明</textarea></td>
                         <p class="errorMessage"> {{ flash.errors.explain|first }}</p>
                     </tr>
                     <tr class="recipeIngredient">
                         <th>材料</th>
                         <td>
-                            <input type="text" name="ingredient" placeholder="何人分">
+                            <input type="text" name="one_person_minutes" placeholder="何人分" value="1">
                             <dl>
-                                <dt><input type="text" name="name" value="" placeholder="材料"></dt>
-                                <dd><input type="text" name="quantity" value="" placeholder="分量"></dd>
+                                <dt><input type="text" name="name[]" value="1a" placeholder="材料"></dt>
+                                <dd><input type="text" name="quantity[]" value="1" placeholder="分量"></dd>
                                 <dd><input type="button" name="" value="↑"><input type="button" name="" value="↓"></dd>
-                                <dt><input type="text" name="name" value="" placeholder="材料"></dt>
-                                <dd><input type="text" name="quantity" value="" placeholder="分量"></dd>
+                                <dt><input type="text" name="name[]" value="2a" placeholder="材料"></dt>
+                                <dd><input type="text" name="quantity[]" value="2" placeholder="分量"></dd>
                                 <dd><input type="button" name="" value="↑"><input type="button" name="" value="↓"></dd>
-                                <dt><input type="text" name="name" value="" placeholder="材料"></dt>
-                                <dd><input type="text" name="quantity" value="" placeholder="分量"></dd>
+                                <dt><input type="text" name="name[]" value="3a" placeholder="材料"></dt>
+                                <dd><input type="text" name="quantity[]" value="3" placeholder="分量"></dd>
                                 <dd><input type="button" name="" value="↑"><input type="button" name="" value="↓"></dd>
                             </dl>
                         </td>
                     </tr>
                     <tr class="recipePoint">
                         <th>コツ</th>
-                        <td><input type="text" name="point" value=""></td>
+                        <td><input type="text" name="point" value="コツ"></td>
                         <p class="errorMessage"> {{ flash.errors.point|first }}</p>
                     </tr>
                     <tr class="recipeMistake">
                         <th>失敗談</th>
-                        <td><input type="text" name="mistake" value=""></td>
+                        <td><input type="text" name="mistake" value="失敗"></td>
                         <p class="errorMessage"> {{ flash.errors.recipeMistake|first }}</p>
                     </tr>
                     <tr>

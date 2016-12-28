@@ -2,6 +2,7 @@
 
 {% block body %}
 <div class="contents">
+    {% include 'include/flashMessage.twig' %}
     <article>
         <section>
             <h2 class="ttl02">レシピ入力画面</h2>
@@ -9,7 +10,7 @@
                 <table class="tblStyle01">
                     <tr class="recipeTitle">
                         <th>レシピタイトル</th>
-                        <td><input type="text" name="title" value="<?= $title ?>"></td>
+                        <td><input type="text" name="title" value="{{ recipe.title }}"></td>
                     </tr>
                     <tr class="recipeVideo">
                         <th>動画</th>
@@ -22,16 +23,16 @@
                     <tr class="recipeIngredient">
                         <th>材料</th>
                         <td>
-                            <input type="text" name="ingredient" placeholder="何人分">
+                            <input type="text" name="one_person_minutes" placeholder="何人分">
                             <dl>
-                                <dt><input type="text" name="name" value="<?= $name ?>" placeholder="材料"></dt>
-                                <dd><input type="text" name="quantity" value="<?= $quantity ?>" placeholder="分量"></dd>
+                                <dt><input type="text" name="name[]" value="" placeholder="材料"></dt>
+                                <dd><input type="text" name="quantity[]" value="" placeholder="分量"></dd>
                                 <dd><input type="button" name="" value="↑"><input type="button" name="" value="↓"></dd>
-                                <dt><input type="text" name="name" value="<?= $name ?>" placeholder="材料"></dt>
-                                <dd><input type="text" name="quantity" value="<?= $quantity ?>" placeholder="分量"></dd>
+                                <dt><input type="text" name="name[]" value="" placeholder="材料"></dt>
+                                <dd><input type="text" name="quantity[]" value="" placeholder="分量"></dd>
                                 <dd><input type="button" name="" value="↑"><input type="button" name="" value="↓"></dd>
-                                <dt><input type="text" name="name" value="<?= $name ?>" placeholder="材料"></dt>
-                                <dd><input type="text" name="quantity" value="<?= $quantity ?>" placeholder="分量"></dd>
+                                <dt><input type="text" name="name[]" value="" placeholder="材料"></dt>
+                                <dd><input type="text" name="quantity[]" value="" placeholder="分量"></dd>
                                 <dd><input type="button" name="" value="↑"><input type="button" name="" value="↓"></dd>
                             </dl>
                         </td>
