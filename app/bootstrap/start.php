@@ -8,6 +8,13 @@ define('VENDOR_PATH', __DIR__.'/../../vendor/');
 define('APP_PATH'   , __DIR__.'/../../app/');
 define('MODULE_PATH', __DIR__.'/../../app/modules/');
 define('PUBLIC_PATH', __DIR__.'/../../public/');
+define('CMD_PATH', __DIR__.'/../../app/cmd/');
+
+// CANDY用
+define('FFMPEG_APP_PATH', CMD_PATH.'ffmpeg');
+define('THUMB_PATH', PUBLIC_PATH.'thumb/');
+define('VIDEO_PATH', PUBLIC_PATH.'video/');
+define('PAGING_THEMES_PATH', ROOT_PATH.'src/Candy/themes/default');
 
 require VENDOR_PATH.'autoload.php';
 

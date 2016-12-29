@@ -292,10 +292,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
         return method_exists($this, $name);
     }
 
-    /*
-     *
-     */
-
     public function findAllPerPage($page)
     {
         if($page == 0) {

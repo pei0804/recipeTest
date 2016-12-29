@@ -22,4 +22,9 @@ class Recipe extends Model {
         return $this->hasMany('Ingredients');
     }
 
+    public function member()
+    {
+        return $this->belongsTo('Member');
+    }
+
 }

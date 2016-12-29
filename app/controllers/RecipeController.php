@@ -14,8 +14,31 @@ Class RecipeController extends Controller
     // 検索画面
     public function index()
     {
+        // title
         $this->data['title'] = 'レシピ一覧';
+
+        // ページングのリンク
+        $page = (int)Input::get('page');
+
+        // これでassetsフォルダにあるcss呼べる
+        $this->loadCss('loadcss.css');
+
+        // レシピテーブル（ORM）
+        $Recipe = new Recipe();
+        try {
+            $findRecipes = $Recipe->newQuery()->orderBy('created_at', 'desc');
+            $this->data['recipes'] = $Recipe->findByQueryPerPage($findRecipes, $page);
+                $this->data['pager'] = $Recipe->paginationNav((int)$page, $this->siteUrl('report'))
+                    ->get_html(PAGING_THEMES_PATH);
+        } catch (\SQLiteException $e) {
+            App::flash('messageError', "データベースエラーが発生しました。管理者にお問い合わせください。");
+            Response::redirect($this->siteUrl('report'));
+        }
+
+        // /candy/app/views/recipe/index.twigをいじれば変わるよ
         View::display('recipe/index.twig', $this->data);
+
+        // header footerはincludeフォルダの中にある
     }
 
     // getでrecipe/createにアクセスされた場合
@@ -45,7 +68,7 @@ Class RecipeController extends Controller
             $isError = true;
         }
 
-        // hogehoge.mpd -> hogehoge
+        // hogehoge.mp4 -> hogehoge
         $clipFileName = pathinfo($clip['name'], PATHINFO_FILENAME);
 
         // ファイル名：filename_timestamp
@@ -98,11 +121,8 @@ Class RecipeController extends Controller
         //----------フォルダ作成（なければ）-------------/
 
         // TODO: 本来はCONFクラスにまとめる
-        $ffmpegAppPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/app/cmd/ffmpeg";
-        $thumbFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/thumb/";
-        $videoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/candy/public/video/";
-        $userVideoFolderPath = $videoFolderPath . $memberId;
-        $userThumbFolderPath = $thumbFolderPath . $memberId;
+        $userVideoFolderPath = VIDEO_PATH . $memberId;
+        $userThumbFolderPath = THUMB_PATH . $memberId;
 
         // フォルダ作成
         //「$userVideoFolderPath」で指定されたディレクトリが存在するか確認
@@ -136,8 +156,8 @@ Class RecipeController extends Controller
 
         //----------サムネイル作成--------------//
         // http://qiita.com/tukiyo3/items/d8caac4fcf8ad5a7167b
-        exec("{$ffmpegAppPath} -i {$uploadFilePath} -ss 5 -vframes 1 -f image2 -s 320x240 {$userThumbFolderPath}/{$clipUploadFileName}.jpg");
-        if (!file_exists("{$thumbFolderPath}{$uploadFilePath}.jpg")) {
+        exec(FFMPEG_APP_PATH." -i ".$uploadFilePath." -ss 5 -vframes 1 -f image2 -s 320x240 ".$userThumbFolderPath."/".$clipUploadFileName.".jpg");
+        if (!file_exists(THUMB_PATH.$uploadFilePath.".jpg")) {
             App::flash('video', 'サムネイル作成に失敗しました。もう一度お試しください');
             $isError = true;
         } else {
@@ -151,7 +171,7 @@ Class RecipeController extends Controller
             // 現状ここのエラーチェックは機能をしていない
             if ($isError) {
                 App::flash('messageError', "登録に失敗しました。入力内容をご確認ください");
-                throw new \Exception;
+//                throw new \Exception;
             }
 
             $db->beginTransaction();
@@ -176,16 +196,14 @@ Class RecipeController extends Controller
         } catch (\Exception $e) {
             print_r($e->getMessage());
             $db->rollBack();
-            Response::redirect($this->siteUrl('recipe/create'));
+//            Response::redirect($this->siteUrl('recipe/create'));
         }
 
     }
 
-    function videoUpload() {
-
-    }
-
     // getでrecipe/:idにアクセスされた場合
+    // 例：http://localhost/candy/public/recipe/10
+    // 10に入った値は自動的に$idに入る
     // 詳細画面
     public function show($id)
     {
