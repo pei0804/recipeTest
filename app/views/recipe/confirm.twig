@@ -23,7 +23,7 @@
                     <tr class="recipeIngredient">
                         <th>材料</th>
                         <td>
-                            <input type="text" name="one_person_minutes" placeholder="何人分">
+                            <input type="text" name="servings_for" placeholder="何人分">
                             <dl>
                                 <dt><input type="text" name="name[]" value="" placeholder="材料"></dt>
                                 <dd><input type="text" name="quantity[]" value="" placeholder="分量"></dd>
@@ -39,11 +39,11 @@
                     </tr>
                     <tr class="recipePoint">
                         <th>コツ</th>
-                        <td><input type="text" name="point" value="<?= $point ?>"></td>
+                        <td><input type="text" name="point" value="{{ flash.recipe.point }}"></td>
                     </tr>
                     <tr class="recipeMistake">
                         <th>失敗談</th>
-                        <td><input type="text" name="mistake" value="<?= $mistake ?>"></td>
+                        <td><input type="text" name="mistake" value="{{ flash.recipe.mistake }}"></td>
                     </tr>
                     <tr>
                         <td>

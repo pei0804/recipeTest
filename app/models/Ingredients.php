@@ -5,14 +5,13 @@ use Candy\Base\Model;
 class Ingredients extends Model {
 
     protected $table = 'ingredients';
-    public $incrementing = false;
-    protected $fillable = ['id', 'ingredients_no', 'name', 'quantity'];
+    protected $fillable = ['recipe_id', 'ingredients_no', 'name', 'quantity'];
 
     protected static function rules()
     {
         return [
-            'name' => ['required', 'string'],
-            'quantity' => ['required', 'integer'],
+            'name' => ['required_with:quantity', 'string'],
+            'quantity' => ['required_with:name', 'string'],
         ];
     }
 }

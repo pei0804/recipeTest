@@ -14,7 +14,6 @@ Class RecipeController extends Controller
     // 検索画面
     public function index()
     {
-        var_dump(Input::get());
         $this->data['title'] = 'レシピ一覧';
         View::display('recipe/index.twig', $this->data);
     }
@@ -41,10 +40,7 @@ Class RecipeController extends Controller
         $recipeInput = Input::post();
         App::flash('input', Input::post());
         $clip = Input::file('clip');
-        if (!is_uploaded_file($clip["tmp_name"])) {
-            App::flash('video', 'ビデオがアップロードできませんでした');
-            $isError = true;
-        } else if ($clip["type"] != "video/mp4") {
+        if (!is_uploaded_file($clip["tmp_name"] && $clip["type"] != "video/mp4")) {
             App::flash('video', 'ビデオはMP4形式のみ対応しています');
             $isError = true;
         }
@@ -84,8 +80,9 @@ Class RecipeController extends Controller
             $checkValue['quantity'] = $ingredientsInput['quantity'][$i];
             $Ingredients->load($checkValue);
             $Ingredients->validate();
+
             if(!$Ingredients->hasErrors()) {
-                $checkValue['quantity'] = $ingredientsNo;
+                $checkValue['ingredients_no'] = $ingredientsNo;
                 $ingredientsNo++;
             }
             $ingredientsInputError[] = $Ingredients->getErrors();
@@ -148,21 +145,28 @@ Class RecipeController extends Controller
             unlink($uploadFilePath);
         }
         //-------------判定---------------
-        if ($isError) {
-            App::flash('messageError', "登録に失敗しました。入力内容をご確認ください");
-        }
 
         $db = \DB::getConnection();
         try {
+            // 現状ここのエラーチェックは機能をしていない
+            if ($isError) {
+                App::flash('messageError', "登録に失敗しました。入力内容をご確認ください");
+                throw new \Exception;
+            }
+
             $db->beginTransaction();
             $Recipe->save();
             $recipeId = $Recipe->getConnection()->getPdo()->lastInsertId();
-            // RecipeID取得のためループ
+
+            // 追加されたレシピIDを取得しつつ、安全な値のみと確定しているが、１件ずつチェックして格納する
             for ($i = 0; $i < count($ingredientsInserts); $i++) {
-                $ingredientsInserts[$i]['id'] = $recipeId;
-                $Ingredients->load($ingredientsInserts);
+                $ingredientsInserts[$i]['recipe_id'] = $recipeId;
+                $Ingredients = $Ingredients->newInstance()->load($ingredientsInserts[$i]);
                 $Ingredients->validate();
-                if(!$Ingredients->hasErrors()) {
+
+                // どちらかが入力されていれば、どちらも入力するというバリデーションは出来るが、
+                // どちらも空白の場合のバリデーションが現状出来ないので、便宜的に文字数もチェックする
+                if(!$Ingredients->hasErrors() && strlen($ingredientsInserts[$i]['name']) != 0 && strlen($ingredientsInserts[$i]['quantity']) != 0) {
                     $Ingredients->save();
                 }
             }
@@ -172,33 +176,12 @@ Class RecipeController extends Controller
         } catch (\Exception $e) {
             print_r($e->getMessage());
             $db->rollBack();
+            Response::redirect($this->siteUrl('recipe/create'));
         }
 
-//        $db = \DB::getConnection();
-//        try {
-//            $db->beginTransaction();
-//            $Recipe->save();
-//            $recipeId = $Recipe->getConnection()->getPdo()->lastInsertId();
-//
-//            $ingredientsNo = 1;
-//            for ($i = 0; $i < count($ingredientsInserts); $i++) {
-//                if(strlen($ingredientsInserts[$i]['name']) != 0 && strlen($ingredientsInserts[$i]['quantity']) != 0) {
-//                    $ingredientsInserts[$i]['id'] = $recipeId;
-//                    $ingredientsInserts[$i]['ingredients_no'] = $ingredientsNo;
-//                    $ingredientsNo++;
-//                    DB::table('ingredients')->insert($ingredientsInserts[$i]);
-//
-//                }
-//            }
-//            DB::table('ingredients')->insert($ingredientsInserts);
-//            $db->commit();
-//            App::flash('messageSuccess', "登録が完了しました");
-////            Response::redirect($this->siteUrl('recipe') . '/' . $recipeId);
-//        } catch (\Exception $e) {
-//            print_r($e->getMessage());
-//            $db->rollBack();
-////            Response::redirect($this->siteUrl('recipe/create'));
-//        }
+    }
+
+    function videoUpload() {
 
     }
 

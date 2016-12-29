@@ -55,43 +55,56 @@
             </div>
         </section>
         <section class="ingredient">
-            <h2 class="ttl02">材料<span>（２人分）</span></h2>
+            <h2 class="ttl02">材料<span>（{{ recipe.servings_for }}）</span></h2>
             <dl>
-                <dt>小麦粉</dt>
-                <dd>110g</dd>
-                <dt>バター</dt>
-                <dd>80g</dd>
-                <dt>砂糖</dt>
-                <dd>90g</dd>
-                <dt>卵</dt>
-                <dd>1個</dd>
-                <dt>アーモンドプードル</dt>
-                <dd>30g(1袋)</dd>
-                <dt>チョコチップ</dt>
-                <dd>50g(1袋)</dd>
+                {{ ingredient in recipe.ingredients().getResults() }}
+                {% for ingredient in recipe.ingredients().getResults() %}
+                <dt>{{ ingredient.name }}</dt>
+                <dd>{{ ingredient.quantity }}</dd>
+                {% endfor %}
                 <!-- $i_name $quantity -->
             </dl>
         </section>
         <section class="recipeStep">
-            <h2 class="ttl02">作り方</h2>
-            <ol>
-                <li><span class="recipeTxt">バターを室温で柔らかくしておく。(必ず室温です。レンジで溶かすと生地の固さや風味が変わってしまいます)</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">室温で柔らかくしておいたバターと砂糖をよく混ぜる。</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">10分くらいひたすら混ぜると白くフワフワのホイップのようになり、クッキーが美味しく仕上がります！</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">卵を数回にわけて少しずつ加え 混ぜる。</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">小麦粉、アーモンドプードルをふるい入れる。</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">生地が混ざったらチョコチップを入れる。(違うトッピングでもok)</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">焼くと倍くらいに広がるので、間隔をあけてスプーンで天板に落とす。（今回は5cmくらいにしました。）</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-                <li><span class="recipeTxt">180度で15分焼く。(直径8cmくらいの仕上がりです。) 焼き色がついたら完成！</span><span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
-            </ol>
+        <p>{{ recipe.explain }}</p>
+        <section class="recipeStep">
+            <h2 class="ttl02">説明</h2>
+            <p>{{ recipe.explain }}</p>
+        </section><section class="recipeStep">
+                <ol>
+                    <li>
+                        <span class="recipeTxt">バターを室温で柔らかくしておく。(必ず室温です。レンジで溶かすと生地の固さや風味が変わってしまいます)</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">室温で柔らかくしておいたバターと砂糖をよく混ぜる。</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">10分くらいひたすら混ぜると白くフワフワのホイップのようになり、クッキーが美味しく仕上がります！</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">卵を数回にわけて少しずつ加え 混ぜる。</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">小麦粉、アーモンドプードルをふるい入れる。</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">生地が混ざったらチョコチップを入れる。(違うトッピングでもok)</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">焼くと倍くらいに広がるので、間隔をあけてスプーンで天板に落とす。（今回は5cmくらいにしました。）</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                    <li>
+                        <span class="recipeTxt">180度で15分焼く。(直径8cmくらいの仕上がりです。) 焼き色がついたら完成！</span>
+                        <span class="recipeImg"><img src="img/dummy.jpg" alt=""></span></li>
+                </ol>
         </section>
         <section class="point">
             <h2 class="ttl02">コツ・ポイント</h2>
-            <p><?= $point ?></p>
+            <p>{{ recipe.point }}</p>
         </section>
         <section class="mistake">
             <h2 class="ttl02">あいうえおさんの失敗談</h2>
-            <p><?= $mistake ?></p>
+            <p>{{ recipe.mistake }}</p>
         </section>
         <section class="comment">
             <h2 class="ttl02">感想や質問(5件)</h2>

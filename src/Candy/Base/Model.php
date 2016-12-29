@@ -3,15 +3,15 @@
 namespace Candy\Base;
 
 use Pagination;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Model extends \Illuminate\Database\Eloquent\Model
 {
-
+    use SoftDeletes;
     protected $errors;
     protected $count = 0;
     protected $perPage = 10;
     protected $maxPage = 10;
-    public $timestamps = false;
 
     protected static function rules()
     {
