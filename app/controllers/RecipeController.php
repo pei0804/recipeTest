@@ -28,7 +28,7 @@ Class RecipeController extends Controller
         try {
             $findRecipes = $Recipe->newQuery()->orderBy('created_at', 'desc');
             $this->data['recipes'] = $Recipe->findByQueryPerPage($findRecipes, $page);
-                $this->data['pager'] = $Recipe->paginationNav((int)$page, $this->siteUrl('report'))
+                $this->data['pager'] = $Recipe->paginationNav((int)$page, $this->siteUrl('recipe'))
                     ->get_html(PAGING_THEMES_PATH);
         } catch (\SQLiteException $e) {
             App::flash('messageError', "データベースエラーが発生しました。管理者にお問い合わせください。");
